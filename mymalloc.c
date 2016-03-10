@@ -6,15 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 
-//Cree une entete dont les 29 premiers bits sont la realSize et les 3 derniers sont 001 car on appelle cette fonction quand on alloue ave mymalloc
-int createHeader(size_t s)
-{
-
-    int entete =(s<<3)+1;
-
-    return entete;
-
-}
 
 // Fonction experimentale qui agrandit le heap a chaque appel
 void *mymalloc(size_t t)
