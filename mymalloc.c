@@ -10,7 +10,7 @@
 
 
 void *base_heap;
-size_t memsize = 1000;
+size_t memsize = 100;
 
 
 void *mymalloc(size_t t)
@@ -23,12 +23,12 @@ if (t<=0 || t>536870911) return NULL;
     size_t headerSize = 4;
     size_t realSize = t + paddingSize + headerSize;
     
+    	if (realSize>memsize) return NULL;
+    	
 if(base_heap==NULL)  // premier 
 {
-	printf("premier");
 	base_heap=sbrk(0);
 	sbrk(memsize);
-	if (realSize>memsize) return NULL; //modifie
 	struct bloc_header *entete = base_heap;
 	 entete->size = realSize;
 	 entete->zero=0;
@@ -43,22 +43,39 @@ if(base_heap==NULL)  // premier
  struct bloc_header *temp2;
  unsigned int taille;
 
- 
+
  
  while(temp<(base_heap+memsize)) // on parcourt les adresses de base_heap jusqu'à la limite
  { 
+	 if((temp+realSize)>(base_heap+memsize))
+	{
+	printf("pas assez de place dans le heap");
+	return NULL;
+	}
+
 	 
 	temp2 = (struct bloc_header*) temp; //cast
 	//taille = temp2->size;
+	
 	taille = ((struct bloc_header *) temp)->size;
-    printf("MERDE %d et CHIOTTE %d", taille, ((struct bloc_header *) temp)->size);
-  if (taille==realSize ) // ils ont la meme taille && temp2->alloc==0
+	
+	if(temp2->size==0) {
+
+	struct bloc_header *entete = temp;
+	 entete->size = realSize;
+	 entete->zero=0;
+	 entete->alloc=1;
+	return (void*) (temp+4);
+	}
+
+
+  if (taille==realSize && temp2->alloc==0) // ils ont la meme taille 
    {	
 	   temp2->alloc=1;
 	    return temp2+4;
 	}
 	
-  if (taille>realSize ) // on peut mettre dedans && temp2->alloc==0
+  if (taille>realSize && temp2->alloc==0) // on peut mettre dedans
 	{
 		temp2->alloc=1; //on modifie le header existant
 		temp2->size=realSize;
@@ -71,16 +88,17 @@ if(base_heap==NULL)  // premier
 		return temp2;
 	}
 	
-	printf("taille %d", taille);
-	//printf("adresse avant %d\n",temp);
+
+
 	temp=temp+taille;
-	//printf("adresse apres %d\n",temp);
-	//printf("taille %d",taille);
+
 	
 	
 	
 	
  }
+
+printf("pas assez de place dans le heap prealloue \n");
 
 return NULL;
 
@@ -114,13 +132,31 @@ int main(int argc, const char *argv[])
 {
 
  struct bloc_header *a = mymalloc(sizeof(struct bloc_header));
- struct bloc_header *b=a-1;
- printf("MAlloc 1 %d\n",(b->size)); //affiche 1
 
-  struct bloc_header *c = mymalloc(sizeof(struct bloc_header));
- struct bloc_header *d=c-1;
- printf("Malloc 2 %d\n",(d->alloc)); //affiche 1
+printf("taille du premier block alloué ça devrait etre 8 = %d\n", (a-1)->size); // ca marche
+
+  struct bloc_header *c = mymalloc(sizeof(struct bloc_header)*2);
+
  
+printf(" devrait etre 12 = %d\n", (c-1)->size); // ca marche
+
+
+ 
+   int *f = mymalloc(21);
+ struct bloc_header *g = f-1;
+ printf("ça devrait etre 28 = %d\n", g->size); // ca marche
+ 
+    int *l = mymalloc(48);
+ struct bloc_header *m = l-1;
+ printf("devrait etre 52 = %d\n", m->size); // ca marche. Si je met 49 et pas 48, la taille passe à 56 et pas 52 et du coup on depasse le heap => ca met une erreur NIQUEL
+ 
+ printf("ça devrait etre 28 encore = %d\n", g->size); // ca marche
+ 
+  // limite de 100 atteinte (pile poile)
+  
+     int *n = mymalloc(4); // il renvoit null et envoit une segment fault car on depasse la limite
+
+
  
 	return 0;
 
