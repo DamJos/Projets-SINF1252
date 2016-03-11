@@ -16,14 +16,22 @@ size_t memsize = 100;
 void *mymalloc(size_t t)
 {
 	
-if (t<=0 || t>536870911) return NULL; 
-
+if (t<=0 || t>536870911) 
+	{
+	printf("argument invalide\n");
+	return NULL; 
+	}
+	
     size_t paddingSize = t%4;
     if (paddingSize != 0) paddingSize=4-paddingSize;
     size_t headerSize = 4;
     size_t realSize = t + paddingSize + headerSize;
     
-    	if (realSize>memsize) return NULL;
+    	if (realSize>memsize) 
+    	{
+			printf("la memoire est trop petite pour contenir un tel bloc\n");
+			return NULL;
+		}
     	
 if(base_heap==NULL)  // premier 
 {
@@ -49,7 +57,7 @@ if(base_heap==NULL)  // premier
  { 
 	 if((temp+realSize)>(base_heap+memsize))
 	{
-	printf("pas assez de place dans le heap");
+	printf("pas assez de place dans le heap\n");
 	return NULL;
 	}
 
@@ -144,43 +152,43 @@ int main(int argc, const char *argv[])
 
  struct bloc_header *a = mymalloc(sizeof(struct bloc_header));
 
-printf("taille du premier block alloué ça devrait etre 8 = %d\n", (a-1)->size); // ca marche
+printf("j'aloue un premier bloc sa taille est 8 = %d\n", (a-1)->size); // ca marche
 
   struct bloc_header *c = mymalloc(sizeof(struct bloc_header)*2);
 
  
-printf(" devrait etre 12 = %d\n", (c-1)->size); // ca marche
-
-
+printf("j'alloue un 2eme bloc, sa taille est 12 = %d\n", (c-1)->size); // ca marche
  
    int *f = mymalloc(21);
  struct bloc_header *g = (struct bloc_header*)f-1;
- printf("ça devrait etre 28 = %d\n", g->size); // ca marche
+ printf(" j'aloue un 3eme bloc sa taille est 28 = %d\n", g->size); // ca marche
  
     int *l = mymalloc(48);
  struct bloc_header *m = (struct bloc_header*)l-1;
- printf("devrait etre 52 = %d\n", m->size); // ca marche. Si je met 49 et pas 48, la taille passe à 56 et pas 52 et du coup on depasse le heap => ca met une erreur NIQUEL
+ printf("j'alloue un 4eme bloc sa taille est 52, le heap est full = %d\n", m->size); // ca marche. Si je met 49 et pas 48, la taille passe à 56 et pas 52 et du coup on depasse le heap => ca met une erreur NIQUEL
  
- printf("ça devrait etre 28 encore = %d\n", g->size); // ca marche
+ printf("je reaffiche la taille du 3eme bloc sa taille est 28 = %d\n", g->size); // ca marche
  
   // limite de 100 atteinte (pile poile)
   
    //  int *n = mymalloc(4); // il renvoit null et envoit une segment fault car on depasse la limite
 
- printf("a est alloue donc ca met 1 = %d\n", ((struct bloc_header*)a-1)->alloc); 
-  printf("size de a est 8 = %d\n", ((struct bloc_header*)a-1)->size); 
+ printf("je verifie que le premier bloc est bien mis en alloue donc 1 = %d\n", ((struct bloc_header*)a-1)->alloc); 
+  printf("je reverifie la taille de a qui est 8 = %d\n", ((struct bloc_header*)a-1)->size); 
  myfree(a); // je libere a qui faisait 8 bytes
- printf("a n'est pas alloue donc ca met 0 = %d\n",((struct bloc_header*)a-1)->alloc); 
-  printf("a est de taille 8 = %d\n", ((struct bloc_header*)a-1)->size); 
+ printf("j'ai libéré le premier bloc donc il n'est plus alloué donc 0 = %d\n",((struct bloc_header*)a-1)->alloc); 
+  printf("le premier bloc a ete libere mais sa taille est toujours 8 = %d\n", ((struct bloc_header*)a-1)->size); 
   
   int *x=mymalloc(sizeof(int));  // on a free une taille de 8 donc on peut remettre dedans un nouveau pointeur de taille 8 (4+header)
-  printf("lemplacement ou il y avait a est denouveau alloue donc affiche 1 = %d\n", ((struct bloc_header*)a-1)->alloc); 
+  printf("je realloue pour un bloc de taille 8 or le premier bloc désaoullé faisait 8 donc il a le mettre dedans et afficher 1 car désormais alloué = %d\n", ((struct bloc_header*)a-1)->alloc); 
   
-  printf("la taille de x est de 8 = %d\n", ((struct bloc_header*)x-1)->size);
+  printf("je verifie la taille de ce bloc qui a remplacé le bloc1 la taille est 8 = %d\n", ((struct bloc_header*)x-1)->size);
   
   myfree(c); //je libere c qui faisait 12 bytes
+  printf("je vais malloc un bloc trop gros donc erreur=");
  int *y = mymalloc(16); // je veux mettre 20 bytes (16+4) alors qu'il n'y en a que 12 de libres donc erreur
- 
+ printf("je veux afficher ce pointeur retourne mais ca m'a retourné null car pas assez de place ca affichera donc nill=");
+ printf("%p\n",y);
  int *z = mymalloc(4); //je veux mettre 8 (4+4) et j'ai 12 de libres donc je devrais mettre a la place ou il y avait c donc ca devrait marcher et il mettra une ettiquette qui vaut 4 derriere
  printf("l'etiquette affiche désormais 8 = %d\n", ((struct bloc_header*)z-1)->size);
  printf("une petite etiquette derriere affiche 4 = %d\n", ((struct bloc_header*)z+1)->size);
