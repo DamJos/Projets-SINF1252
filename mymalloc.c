@@ -92,7 +92,7 @@ if(base_heap==NULL)  // premier
 		
 		
 		struct bloc_header *temp3 = (temp2+(realSize)/4); //on va a l'adresse ou on mettra le prochain header
-		temp3->alloc=1; //on cree le header
+		temp3->alloc=0; //on cree le header
 		temp3->zero=0;
 		temp3->size=taille-realSize;
 		printf("j'ai un bloc trop grand donc je le rapeticie\n");
@@ -189,8 +189,7 @@ printf("j'alloue un 2eme bloc, sa taille est 12 = %d\n", (c-1)->size); // ca mar
  printf("je reaffiche la taille du 3eme bloc sa taille est 28 = %d\n", g->size); // ca marche
  
   // limite de 100 atteinte (pile poile)
-  
-   //  int *n = mymalloc(4); // il renvoit null et envoit une segment fault car on depasse la limite
+  // il renvoit null et envoit une segment fault car on depasse la limite
 
  printf("je verifie que le premier bloc est bien mis en alloue donc 1 = %d\n", ((struct bloc_header*)a-1)->alloc); 
   printf("je reverifie la taille de a qui est 8 = %d\n", ((struct bloc_header*)a-1)->size); 
