@@ -32,18 +32,17 @@ int clean_suite1(void) {
     free(globStr); //on libère la mémoire allouée lors de l'initialisation de la suite
     return 0;
 }
-
+struct bloc_header *tempa;
 
 // @tri:test01 => [Allocation 1ere bloc dont la taille devrait être 8]
 void test01(void) {
     struct bloc_header *a = mymalloc(sizeof(struct bloc_header));
-printf("j'aloue un premier bloc sa taille est 8 = %d\n", (a-1)->size);
-    CU_ASSERT_EQUAL((a-1)->size, 8); 
+    CU_ASSERT_EQUAL((a-1)->size, 8);
+    tempa=a;
 }
 // @tri:test02 => [Allocation 2eme bloc dont la taille devrait être 12]
 void test02(void) {
     struct bloc_header *c = mymalloc(2*sizeof(struct bloc_header));
-printf("j'alloue un 2eme bloc, sa taille est 12 = %d\n", (c-1)->size); // ca marche
     CU_ASSERT_EQUAL((c-1)->size, 12); 
 }
 // @tri:test03 => [Allocation 3eme bloc dont la taille devrait être 28]
@@ -52,6 +51,29 @@ void test03(void) {
     struct bloc_header *g = (struct bloc_header*)f-1;
     CU_ASSERT_EQUAL(g->size, 28); 
 }
+// @tri:test04 => [Allocation 4eme bloc dont la taille devrait être 52 (heap full 100)]
+void test04(void) {
+    int *l = mymalloc(48);
+    struct bloc_header *m = (struct bloc_header*)l-1;
+    CU_ASSERT_EQUAL(m->size, 52); 
+}
+// @tri:test05 => [Le 1ere bloc devrait etre toujorus alloué et avoir une taille de 8]
+void test05(void) {
+    CU_ASSERT_EQUAL((temp-1)->alloc, 1); 
+    CU_ASSERT_EQUAL((temp-1)->size, 8); 
+}
+// @tri:test06 => [Le 1ere bloc ne devrait plus etre alloué après un free]
+void test06(void) {
+    myfree(tempa);
+    CU_ASSERT_EQUAL((tempa-1)->alloc, 0);
+}
+// @tri:test07 => [LA 1ere bloc devrait être réallouer si on demande la meme taille]
+void test06(void) {
+    int *x=mymalloc(sizeof(struct bloc_header));
+    CU_ASSERT_EQUAL((x-1)->alloc, 1);
+    CU_ASSERT_EQUAL((x-1)->size, 8);
+}
+
 
 
 int main() {
@@ -72,7 +94,10 @@ int main() {
      * test_strlen1 sera exécuté en premier, puis test_strlen2, etc ...*/
     if(NULL == CU_add_test(pSuite, "test01", test01) ||
        NULL == CU_add_test(pSuite, "test02", test02) ||
-       NULL == CU_add_test(pSuite, "test03", test03)
+       NULL == CU_add_test(pSuite, "test03", test03) ||
+       NULL == CU_add_test(pSuite, "test04", test04) ||
+       NULL == CU_add_test(pSuite, "test05", test05) ||
+       NULL == CU_add_test(pSuite, "test06", test06)
        ) {
         CU_cleanup_registry();
         return CU_get_error();
