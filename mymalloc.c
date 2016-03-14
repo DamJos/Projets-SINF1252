@@ -166,7 +166,7 @@ void myfree(void *ptr)
 
 
 
-int main(int argc, const char *argv[])
+/*int main(int argc, const char *argv[])
 {
 
  struct bloc_header *a = mymalloc(sizeof(struct bloc_header));
@@ -222,4 +222,4 @@ printf("voyons si le bloc de 80 a bien taille de 80 en header= %d\n", ((struct b
   
 	return 0;
 
-}
+}*/
