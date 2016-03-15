@@ -152,10 +152,33 @@ void myfree(void *ptr)
 	
 	if (suivant->alloc==0)
 	{
-		printf("coucou");
+		printf("fusion avec le bloc suivant");
 	modif->size= (modif->size)+(suivant->size);
-			return;
 	}
+	
+	struct bloc_header *precedent=base_heap;
+	
+	if(modif==base_heap) return;
+	
+	while(1)
+	{
+	
+		if (((struct bloc_header*) precedent+((precedent->size)/4))==modif)
+		{
+	
+			if(precedent->alloc==0)
+			{
+			precedent->size=(precedent->size)+(modif->size);
+			return;
+			}
+			
+		return;
+		}
+		
+	precedent=precedent+((precedent->size)/4);
+	
+	}	
+
 	
 	return;
 	
@@ -166,7 +189,7 @@ void myfree(void *ptr)
 
 
 
-/*int main(int argc, const char *argv[])
+int main(int argc, const char *argv[])
 {
 
  struct bloc_header *a = mymalloc(sizeof(struct bloc_header));
@@ -211,15 +234,16 @@ printf("j'alloue un 2eme bloc, sa taille est 12 = %d\n", (c-1)->size); // ca mar
  printf("l'etiquette affiche désormais 8 = %d\n", ((struct bloc_header*)z-1)->size);
  printf("une petite etiquette derriere affiche 4 = %d\n", ((struct bloc_header*)z+1)->size);
  
- myfree(l); // je libere l qui faisait 52
- myfree(f); // je libere f qui faisait 28 et l derriere est libre donc ca fusionne et jai un bloc de 80
- int *r = mycalloc(76); // jessaye de reremplir ce gros bloc créé par fusion via calloc donc rempli de 0
+ myfree(f); // je libere l qui faisait 52 f=28 l=52
+ myfree(l); // je libere f qui faisait 28 
+ int *r = mycalloc(80); // jessaye de reremplir ce gros bloc créé par fusion via calloc donc rempli de 0
  printf("j'ai free les blocs de 28 et 52 qui ont du fusionner pour faire 80 bytes de libre\n");
  printf("jessaye de mettre un bloc de 80 (76+4) dans le bloc resultant de la fusion\n");
  printf("voyons si le bloc de 80 a été alloué ca devrait mettre 1 = %d\n", ((struct bloc_header*)r-1)->alloc);
   printf("voyons si le bloc de 80 a été rempli de 0 donc ca devrait afficher 0 = %d\n", *r);
 printf("voyons si le bloc de 80 a bien taille de 80 en header= %d\n", ((struct bloc_header*)r-1)->size);
+printf("ca affiche 84 car j'ai mis 80+4, j'avais 84 libre car le petit bloc de 4 au dessus a fusionné");
   
 	return 0;
 
-}*/
+}
