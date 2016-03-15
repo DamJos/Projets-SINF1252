@@ -136,46 +136,59 @@ void *pointeur = mymalloc(t);
 
 void myfree(void *ptr)
 {
+	if(base_heap==NULL) 
+	{
+		printf("vous voulez free mais vous n'avez fait aucun malloc ou calloc");
+		return;
+		
+	}
 	struct bloc_header* modif= ((struct bloc_header*)ptr)-1;
-	if(modif->alloc==0)
+	
+	if(modif->alloc==0) // deja libre
 	{
 	printf("vous voulez free une adresse non-allouée");	
 	return;
 		
 	}
 	
-	modif->alloc=0;
+	modif->alloc=0; //on definit à libre
 	
-
-	struct bloc_header *suivant = modif+((modif->size)/4);
-	
-	
-	if (suivant->alloc==0)
+	if(modif+((modif->size)/4)!=base_heap+memsize)
 	{
-		printf("fusion avec le bloc suivant");
-	modif->size= (modif->size)+(suivant->size);
+
+	struct bloc_header *suivant = modif+((modif->size)/4); // on sélectionne l'étiquette du bloc suivant
+	
+	
+	if (suivant->alloc==0)  
+	{
+		printf("fusion avec le bloc suivant\n");
+		modif->size= (modif->size)+(suivant->size); //modification de l'étiquette
+	
+	}
+	
 	}
 	
 	struct bloc_header *precedent=base_heap;
 	
-	if(modif==base_heap) return;
+	if(modif==base_heap) return; //on ne peut pas fusionner avec le bloc précédent si on est le premier bloc
 	
-	while(1)
+	while(1) //parcourt jusque quand on trouve le bloc précédent à celui donné en argument
 	{
 	
-		if (((struct bloc_header*) precedent+((precedent->size)/4))==modif)
+		if (((struct bloc_header*) precedent+((precedent->size)/4))==modif) // si le bloc suivant est égale au bloc donné en argument
 		{
 	
 			if(precedent->alloc==0)
 			{
-			precedent->size=(precedent->size)+(modif->size);
-			return;
+			precedent->size=(precedent->size)+(modif->size); //modification de la taille. (La taille a déjà été actualisé s'il y avait déjà eu fusion précédemmet).
+			printf("fusion avec le bloc précédent\n");
+			return; // on a fusionné et on return
 			}
 			
-		return;
+		return; // on return dans le cas où la fusion avec le bloc précédent ne marche pas (il est déjà alloué).
 		}
 		
-	precedent=precedent+((precedent->size)/4);
+	precedent=precedent+((precedent->size)/4); // on passe au bloc suviant
 	
 	}	
 
@@ -234,13 +247,13 @@ printf("j'alloue un 2eme bloc, sa taille est 12 = %d\n", (c-1)->size); // ca mar
  printf("l'etiquette affiche désormais 8 = %d\n", ((struct bloc_header*)z-1)->size);
  printf("une petite etiquette derriere affiche 4 = %d\n", ((struct bloc_header*)z+1)->size);
  
- myfree(f); // je libere l qui faisait 52 f=28 l=52
- myfree(l); // je libere f qui faisait 28 
- int *r = mycalloc(80); // jessaye de reremplir ce gros bloc créé par fusion via calloc donc rempli de 0
- printf("j'ai free les blocs de 28 et 52 qui ont du fusionner pour faire 80 bytes de libre\n");
- printf("jessaye de mettre un bloc de 80 (76+4) dans le bloc resultant de la fusion\n");
- printf("voyons si le bloc de 80 a été alloué ca devrait mettre 1 = %d\n", ((struct bloc_header*)r-1)->alloc);
-  printf("voyons si le bloc de 80 a été rempli de 0 donc ca devrait afficher 0 = %d\n", *r);
+myfree(l); // je libere l qui faisait 52 f=28 l=52
+myfree(f); // je libere f qui faisait 28 
+int *r = mycalloc(80); // jessaye de reremplir ce gros bloc créé par fusion via calloc donc rempli de 0
+printf("j'ai free les blocs de 28 et 52 qui ont du fusionner pour faire 80 bytes de libre\n");
+printf("jessaye de mettre un bloc de 80 (76+4) dans le bloc resultant de la fusion\n");
+printf("voyons si le bloc de 80 a été alloué ca devrait mettre 1 = %d\n", ((struct bloc_header*)r-1)->alloc);
+printf("voyons si le bloc de 80 a été rempli de 0 donc ca devrait afficher 0 = %d\n", *r);
 printf("voyons si le bloc de 80 a bien taille de 80 en header= %d\n", ((struct bloc_header*)r-1)->size);
 printf("ca affiche 84 car j'ai mis 80+4, j'avais 84 libre car le petit bloc de 4 au dessus a fusionné");
   
